@@ -1,0 +1,86 @@
+﻿{
+  "Sites": [
+    {
+      "Name": "Test",
+      "ClientName": null,
+      "ErpClientId": 18,
+      "WarehouseCode": "1",
+      "PurchaseOrderStatusForDownload": "2",
+      "SalesOrderStatusForDownload": "2",
+      "Url": "https://demoierpgateway.azurewebsites.net",
+      "BearerToken": "Q_l89f4Yhc5adt77G~~UVGFJ_s82If_oOo"
+    }
+  ],
+  "Schedules": [
+    {
+      "Name": "ProductDownload",
+      "Active": true,
+      "RunOnStartup": false,
+      "Start": "2020-01-01T00:00:50-05:00",
+      "Sleep": "00:00:30",
+      "Class": "Pro4Soft.iErpIntegration.Workers.Download.ProductDownload",
+      "ThreadName": "Download",
+      "AdditionalSettings": {}
+    },
+    {
+      "Name": "PurchaseOrderDownload",
+      "Active": true,
+      "RunOnStartup": false,
+      "Start": "2020-01-01T00:00:50-05:00",
+      "Sleep": "00:00:30",
+      "Class": "Pro4Soft.iErpIntegration.Workers.Download.PurchaseOrderDownload",
+      "ThreadName": "Download",
+      "AdditionalSettings": {}
+    },
+    {
+      "Name": "SalesOrderDownload",
+      "Active": true,
+      "RunOnStartup": false,
+      "Start": "2020-01-01T00:00:50-05:00",
+      "Sleep": "00:00:30",
+      "Class": "Pro4Soft.iErpIntegration.Workers.Download.SalesOrderDownload",
+      "ThreadName": "Download",
+      "AdditionalSettings": {}
+    },
+    {
+      "Name": "SalesOrderUpload",
+      "Active": true,
+      "RunOnStartup": true,
+      "Start": "2020-01-01T00:00:50-05:00",
+      "Sleep": "00:05:00",
+      "Class": "Pro4Soft.iErpIntegration.Workers.Upload.SalesOrderUpload",
+      "ThreadName": "Upload",
+      "AdditionalSettings": {}
+    },
+    {
+      "Name": "PurchaseOrderUpload",
+      "Active": true,
+      "RunOnStartup": true,
+      "Start": "2020-01-01T00:00:50-05:00",
+      "Sleep": "00:05:00",
+      "Class": "Pro4Soft.iErpIntegration.Workers.Upload.PurchaseOrderUpload",
+      "ThreadName": "Upload",
+      "AdditionalSettings": {}
+    },
+    {
+      "Name": "WorkOrderUpload",
+      "Active": true,
+      "RunOnStartup": true,
+      "Start": "2020-01-01T00:00:50-05:00",
+      "Sleep": "00:05:00",
+      "Class": "Pro4Soft.iErpIntegration.Workers.Upload.WorkOrderUpload",
+      "ThreadName": "Upload",
+      "AdditionalSettings": {}
+    },
+    {
+      "Name": "AdjustmentUpload",
+      "Active": true,
+      "RunOnStartup": true,
+      "Start": "2020-01-01T00:00:50-05:00",
+      "Sleep": "00:00:30",
+      "Class": "Pro4Soft.iErpIntegration.Workers.Upload.AdjustmentUpload",
+      "ThreadName": "Upload",
+      "AdditionalSettings": {}
+    }
+  ]
+}
