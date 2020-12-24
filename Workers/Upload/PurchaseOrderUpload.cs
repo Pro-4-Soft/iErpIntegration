@@ -46,9 +46,27 @@ $select=Id,PurchaseOrderNumber,ReferenceNumber
                     {
                         try
                         {
-                            throw new Exception("FAIL TEST");
-                            //DO SOME WORK
+                            await site.WebInvokeAsync<dynamic>("IERPOperatSrv_EntradasComp/AddEntradaAsync", null, Method.POST, new
+                            {
+                                EP_Id_Empresa = site.ErpClientId,
+                                ET_Referencia = po.PurchaseOrderNumber,
+                                //EQ_ID_EntradasTipo = 4,//??
+                                //MO_Id_Moneda = 19,//??
+                                ET_Fecha_Emision = DateTime.UtcNow,
+                                ETS_Id_Estatus = 1,
+                                //ET_ControlInventario = true,//??
+                                //MF_Factor_Compra = 12,//??
+                                Detalles = po.Lines.Select(c=>new
+                                {
+                                    PR_Id_Producto = c.Product.ReferenceNumber?.ParseInt(),//??
+                                    AL_Id_Almacen = site.WarehouseCode.ParseInt(),
+                                    //ME_Id_Medida = 25,//??
+                                    ED_Cantidad = c.ReceivedQuantity,
+                                    //ED_Costo_Unitario = 50//??
+                                }).ToList()
+                            });
 
+                            //Confirm success
                             await Singleton<Web>.Instance.PostInvokeAsync("api/PurchaseOrderApi/CreateOrUpdate", new
                             {
                                 po.Id,
@@ -61,6 +79,7 @@ $select=Id,PurchaseOrderNumber,ReferenceNumber
                         }
                         catch (Exception e)
                         {
+                            //Mark as failed
                             await Singleton<Web>.Instance.PostInvokeAsync("api/PurchaseOrderApi/CreateOrUpdate", new
                             {
                                 po.Id,

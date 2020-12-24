@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Pro4Soft.iErpIntegration.Dto.P4W;
 using Pro4Soft.iErpIntegration.Infrastructure;
+using RestSharp;
 
 namespace Pro4Soft.iErpIntegration.Workers.Upload
 {
@@ -21,7 +22,7 @@ namespace Pro4Soft.iErpIntegration.Workers.Upload
 
         public async Task ExecuteAsync()
         {
-            foreach (var companySettings in App<Settings>.Instance.Sites)
+            foreach (var site in App<Settings>.Instance.Sites)
             {
                 try
                 {
@@ -34,9 +35,9 @@ $select=Id,PickTicketNumber,ReferenceNumber
                             $expand=Product($select=Id,Sku),
                                     PickTicketLine($select=Id,LineNumber,ReferenceNumber;$orderby=ReferenceNumber),
                                     LineDetails($select=Id,PacksizeEachCount,LotNumber,SerialNumber,ExpiryDate,PickedQuantity)))
-&$filter=UploadDate eq null and PickTicketState eq 'Closed' and {(string.IsNullOrWhiteSpace(companySettings.ClientName) ?
+&$filter=UploadDate eq null and PickTicketState eq 'Closed' and {(string.IsNullOrWhiteSpace(site.ClientName) ?
                         "ClientId eq null" :
-                        $"Client/Name eq '{companySettings.ClientName}'")}";
+                        $"Client/Name eq '{site.ClientName}'")}";
 
                     var sos = await Singleton<Web>.Instance.GetInvokeAsync<List<PickTicket>>(url);
                     if (!sos.Any())
@@ -46,9 +47,26 @@ $select=Id,PickTicketNumber,ReferenceNumber
                     {
                         try
                         {
-                            throw new Exception("FAIL TEST");
-                            //DO SOME WORK
+                            await site.WebInvokeAsync<dynamic>("IERPOperatSrv_DespachosComp/AddDespachoAsync", null, Method.POST, new
+                            {
+                                //DI_Id_Direccion = 211,//??
+                                //CN_Id_Contacto = 169,//??
+                                EP_Id_Empresa = site.ErpClientId,
+                                DS_Fecha_Despacho = DateTime.UtcNow,
+                                DS_Fecha_Emision = DateTime.UtcNow,
+                                DS_Referencia = so.PickTicketNumber,
+                                //DSE_Id_Estatus = 1,//??
+                                //EN_Id_Cliente = 331,//??
+                                Detalles = so.GetOrderLines().Select(c => new
+                                {
+                                    PR_Id_Producto = c.Product.ReferenceNumber?.ParseInt(),//??
+                                    //ME_Id_Medida = 25,//??
+                                    AL_Id_Almacen = site.WarehouseCode.ParseInt(),
+                                    ED_Cantidad = c.PickedQuantity,
+                                }).ToList()
+                            });
 
+                            //Confirm success
                             await Singleton<Web>.Instance.PostInvokeAsync("api/PickTicketApi/CreateOrUpdate", new
                             {
                                 so.Id,
@@ -57,10 +75,11 @@ $select=Id,PickTicketNumber,ReferenceNumber
                                 UploadMessage = (string)null,
                             });
 
-                            await LogAsync($"SO: [{so.PickTicketNumber}] for [{companySettings.ClientName ?? companySettings.Name}] uploaded");
+                            await LogAsync($"SO: [{so.PickTicketNumber}] for [{site.ClientName ?? site.Name}] uploaded");
                         }
                         catch (Exception e)
                         {
+                            //Mark as failed
                             await Singleton<Web>.Instance.PostInvokeAsync("api/PickTicketApi/CreateOrUpdate", new
                             {
                                 so.Id,

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Pro4Soft.iErpIntegration.Dto.P4W;
 using Pro4Soft.iErpIntegration.Infrastructure;
+using RestSharp;
 
 namespace Pro4Soft.iErpIntegration.Workers.Upload
 {
@@ -62,10 +63,18 @@ namespace Pro4Soft.iErpIntegration.Workers.Upload
                 if (!string.IsNullOrWhiteSpace(companySettings.ClientName))
                     clientAdjustments = allAdjustments.Where(c => c.Client == companySettings.ClientName).ToList();
 
+                clientAdjustments.Where(c => c.SubType == SubTypeConstants.AdjustOut).ToList().ForEach(c => c.Quantity *= -1);
+
                 var reference = Guid.NewGuid();
                 try
                 {
-                    await ProcessAdjustments(clientAdjustments, reference, companySettings);
+                    //Inbound
+                    await ProcessAdjustments(clientAdjustments.Where(c=>c.Quantity > 0), reference, companySettings);
+
+                    //Outbound
+                    await ProcessAdjustments(clientAdjustments.Where(c => c.Quantity > 0), reference, companySettings);
+
+                    //Confirm success
                     await Singleton<Web>.Instance.PostInvokeAsync("api/Audit/SetIntegrationReference", new
                     {
                         Ids = clientAdjustments.Select(c => c.Id).ToList(),
@@ -76,6 +85,8 @@ namespace Pro4Soft.iErpIntegration.Workers.Upload
                 catch (Exception e)
                 {
                     await LogErrorAsync(e);
+
+                    //Mark as failed
                     await Singleton<Web>.Instance.PostInvokeAsync("api/Audit/SetIntegrationReference", new
                     {
                         Ids = clientAdjustments.Select(c => c.Id).ToList(),
@@ -86,10 +97,27 @@ namespace Pro4Soft.iErpIntegration.Workers.Upload
             }
         }
 
-        private async Task ProcessAdjustments(IEnumerable<Adjustment> adjustments, Guid reference, SiteSettings companySettings)
+        private async Task ProcessAdjustments(IEnumerable<Adjustment> adjustments, Guid reference, SiteSettings site)
         {
-            throw new Exception("FAIL TEST");
-            //DO SOME WORK
+            //Inbound
+            await site.WebInvokeAsync<dynamic>("IERPOperatSrv_EntradasComp/AddEntradaAsync", null, Method.POST, new
+            {
+                EP_Id_Empresa = site.ErpClientId,
+                //SQ_ID_SalidasTipo = 4,//??
+                SL_Referencia = reference,
+                //MO_ID_Moneda = 19,//??
+                //MF_Factor_Venta = 1,//??
+                SL_Fecha_Emision = DateTime.UtcNow,
+                //SL_ID_Estatus = 2,//??
+                Detalles = adjustments.Where(c=>c.Quantity > 0).Select(c => new
+                {
+                    //PR_Id_Producto = c.Sku,//??
+                    AL_Id_Almacen = site.WarehouseCode.ParseInt(),
+                    //ME_Id_Medida = 25,//??
+                    ED_Cantidad = c.Quantity,//Can be negative in case of a negative adjustment
+                    //ED_Costo_Unitario = 50//??
+                }).ToList()
+            });
         }
     }
 }

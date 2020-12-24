@@ -69,6 +69,7 @@
     <Compile Include="Dto\P4W\ObjectChangeEvent.cs" />
     <Compile Include="Dto\P4W\SubTypeConstants.cs" />
     <Compile Include="Infrastructure\Cache.cs" />
+    <Compile Include="Infrastructure\Extensions.cs" />
     <Compile Include="Infrastructure\ScheduleSetting.cs" />
     <Compile Include="Workers\Download\SalesOrderDownload.cs" />
     <Compile Include="Workers\Download\PurchaseOrderDownload.cs" />
