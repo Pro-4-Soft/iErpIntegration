@@ -9,6 +9,7 @@ namespace Pro4Soft.iErpIntegration.Dto.P4W
         public string PickTicketNumber { get; set; }
         public string ReferenceNumber { get; set; }
         public string PickTicketState { get; set; }
+        public Customer Customer { get; set; }
         public Client Client { get; set; }
         public Guid? ClientId { get; set; }
         public List<SalesOrderTote> Totes { get; set; } = new List<SalesOrderTote>();
@@ -36,6 +37,12 @@ namespace Pro4Soft.iErpIntegration.Dto.P4W
             }
             return result;
         }
+    }
+
+    public class Customer : IdObject
+    {
+        public string CustomerCode { get; set; }
+        public string CompanyName { get; set; }
     }
 
     public class SalesOrderTote : IdObject

@@ -30,6 +30,7 @@ namespace Pro4Soft.iErpIntegration.Workers.Upload
 $select=Id,PickTicketNumber,ReferenceNumber
 &$orderby=PickTicketNumber
 &$expand=Client($select=Name),
+        Customer($select=Id,CustomerCode,CompanyName),
         Totes($select=Id,Sscc18Code,CartonNumber;
               $expand=Lines($select=Id,PickedQuantity;
                             $expand=Product($select=Id,Sku),
@@ -56,7 +57,7 @@ $select=Id,PickTicketNumber,ReferenceNumber
                                 DS_Fecha_Emision = DateTime.UtcNow,
                                 DS_Referencia = so.PickTicketNumber,
                                 //DSE_Id_Estatus = 1,//??
-                                //EN_Id_Cliente = 331,//??
+                                EN_Id_Cliente = so.Customer.CustomerCode,
                                 Detalles = so.GetOrderLines().Select(c => new
                                 {
                                     PR_Id_Producto = c.Product.ReferenceNumber?.ParseInt(),//??
