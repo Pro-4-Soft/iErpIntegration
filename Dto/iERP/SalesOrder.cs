@@ -18,6 +18,9 @@ namespace Pro4Soft.iErpIntegration.Dto.iERP
         [JsonProperty("EN_Razon_Social")]
         public string CustomerName { get; set; }
 
+        [JsonProperty("Email")]
+        public string Email { get; set; }
+
         [JsonProperty("Detalles")]
         public List<SalesOrderLine> Lines { get; set; } = new List<SalesOrderLine>();
     }

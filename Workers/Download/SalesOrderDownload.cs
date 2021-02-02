@@ -50,6 +50,7 @@ namespace Pro4Soft.iErpIntegration.Workers.Download
                                     ClientId = clientId,
                                     CustomerCode = order.CustomerName,
                                     CompanyName = order.CustomerName,
+                                    order.Email
                                 });
                                 customerId = cust.Id;
                                 await LogAsync($"Customer [{cust.CustomerCode}] {(string.IsNullOrWhiteSpace(site.ClientName) ? "" : $"for [{site.ClientName}]")} created");
