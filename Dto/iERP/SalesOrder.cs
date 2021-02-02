@@ -24,6 +24,9 @@ namespace Pro4Soft.iErpIntegration.Dto.iERP
         [JsonProperty("Phone")]
         public string Phone { get; set; }
 
+        [JsonProperty("ContactPerson")]
+        public string ContactPerson { get; set; }
+
         [JsonProperty("Detalles")]
         public List<SalesOrderLine> Lines { get; set; } = new List<SalesOrderLine>();
     }
