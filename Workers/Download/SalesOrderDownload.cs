@@ -70,6 +70,7 @@ namespace Pro4Soft.iErpIntegration.Workers.Download
                                 //ShipToStateProvince = order.ShippingAddress?.ProvinceCode ?? order.BillingAddress?.ProvinceCode,
                                 //ShipToZipPostal = order.ShippingAddress?.Zip ?? order.BillingAddress?.Zip,
                                 //ShipToCountry = order.ShippingAddress?.CountryCode ?? order.BillingAddress?.CountryCode,
+                                ShipToPhone = order.Phone,
                                 Lines = order.Lines
                                     .Select(c => new
                                     {
