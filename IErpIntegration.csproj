@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dto\P4W\ProductAvailabilityRecord.cs" />
     <Compile Include="Dto\P4W\WorkOrder.cs" />
     <Compile Include="Dto\iERP\SalesOrder.cs" />
     <Compile Include="Dto\iERP\PurchaseOrder.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Workers\Download\SalesOrderDownload.cs" />
     <Compile Include="Workers\Download\PurchaseOrderDownload.cs" />
     <Compile Include="Workers\Upload\AdjustmentUpload.cs" />
+    <Compile Include="Workers\Upload\InventorySyncUpload.cs" />
     <Compile Include="Workers\Upload\WorkOrderUpload.cs" />
     <Compile Include="Workers\Upload\SalesOrderUpload.cs" />
     <Compile Include="Workers\Upload\PurchaseOrderUpload.cs" />

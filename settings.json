@@ -81,6 +81,16 @@
       "Class": "Pro4Soft.iErpIntegration.Workers.Upload.AdjustmentUpload",
       "ThreadName": "Upload",
       "AdditionalSettings": {}
+    },
+    {
+      "Name": "InventorySyncUpload",
+      "Active": true,
+      "RunOnStartup": true,
+      "Start": "2020-01-01T00:00:50-05:00",
+      "Sleep": "00:00:30",
+      "Class": "Pro4Soft.iErpIntegration.Workers.Upload.InventorySyncUpload",
+      "ThreadName": "Upload",
+      "AdditionalSettings": {}
     }
   ]
 }
