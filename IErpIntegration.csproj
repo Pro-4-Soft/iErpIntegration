@@ -59,6 +59,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="VERSION.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="STANDALONE.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="UNINSTALL.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="INSTALL.cmd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Compile Include="Dto\P4W\ProductAvailabilityRecord.cs" />
     <Compile Include="Dto\P4W\WorkOrder.cs" />
     <Compile Include="Dto\iERP\SalesOrder.cs" />
@@ -97,13 +109,11 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Infrastructure\Generics.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Infrastructure\AppSettings.cs" />
     <Compile Include="Infrastructure\BaseWorker.cs" />
     <Compile Include="Workers\Download\ProductDownload.cs" />
     <Compile Include="Workers\Settings.cs" />
-    <None Include="test.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

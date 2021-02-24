@@ -20,16 +20,9 @@ namespace Pro4Soft.iErpIntegration
         private RestClient _client;
         public RestClient Client => _client ??= new RestClient(CloudUrl);
 
-        public void Initialize(string[] args = null)
+        static void Main(string[] args)
         {
-            Args = args;
-            CloudUrl = args?.Length > 0 ? args[0] : ConfigurationManager.AppSettings["CloudUrl"];
-            ApiKey = args?.Length > 1 ? args[1] : ConfigurationManager.AppSettings["ApiKey"];
-        }
-
-        public void Startup()
-        {
-            var command = Args?.Length > 0 ? Args?[0].ToLower().Trim() : null;
+            var command = args?.Length > 0 ? args?[0].ToLower().Trim() : null;
             switch (command)
             {
                 case "/version":
@@ -39,34 +32,36 @@ namespace Pro4Soft.iErpIntegration
                     ManagedInstallerClass.InstallHelper(new[] { Assembly.GetExecutingAssembly().Location });
                     break;
                 case "/uninstall":
-                    ManagedInstallerClass.InstallHelper(new[] { "/u", Assembly.GetExecutingAssembly().Location });
+                    ManagedInstallerClass.InstallHelper(new[] {"/u", Assembly.GetExecutingAssembly().Location});
                     break;
-                default:
-                {
-                    Console.Out.WriteLine($"CloudUrl: {CloudUrl}");
-                    Console.Out.WriteLine($"ApiKey: {ApiKey}");
-
+                case "/standalone":
                     try
                     {
-                        TenantId = Singleton<Web>.Instance.GetInvokeAsync<TenantDetails>("api/TenantApi/GetTenantDetails").Result.Id;
-
-                        Console.Out.WriteLine($"TenantId: {TenantId}");
-
-                        OnStart(Args);
+                        Singleton<EntryPoint>.Instance.OnStart(args);
                         Console.In.ReadLine();
-                        OnStop();
+                        Singleton<EntryPoint>.Instance.OnStop();
                     }
                     catch (Exception ex)
                     {
                         Console.Out.WriteLine(ex.ToString());
                     }
                     break;
-                }
+                default:
+                    Run(new ServiceBase[] {new EntryPoint()});
+                    break;
             }
         }
 
         protected override void OnStart(string[] args)
         {
+            Singleton<EntryPoint>.Instance.CloudUrl = ConfigurationManager.AppSettings["CloudUrl"];
+            Singleton<EntryPoint>.Instance.ApiKey = ConfigurationManager.AppSettings["ApiKey"];
+            Singleton<EntryPoint>.Instance.TenantId = Singleton<Web>.Instance.GetInvokeAsync<TenantDetails>("api/TenantApi/GetTenantDetails").Result.Id;
+
+            Console.Out.WriteLine($"CloudUrl: {Singleton<EntryPoint>.Instance.CloudUrl}");
+            Console.Out.WriteLine($"ApiKey: {Singleton<EntryPoint>.Instance.ApiKey}");
+            Console.Out.WriteLine($"TenantId: {Singleton<EntryPoint>.Instance.TenantId}");
+
             ScheduleThread.Instance.Start();
         }
 
