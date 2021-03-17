@@ -63,6 +63,16 @@
       "AdditionalSettings": {}
     },
     {
+      "Name": "CustomerReturnUpload",
+      "Active": true,
+      "RunOnStartup": true,
+      "Start": "2020-01-01T00:00:50-05:00",
+      "Sleep": "00:05:00",
+      "Class": "Pro4Soft.iErpIntegration.Workers.Upload.CustomerReturnUpload",
+      "ThreadName": "Upload",
+      "AdditionalSettings": {}
+    },
+    {
       "Name": "WorkOrderUpload",
       "Active": true,
       "RunOnStartup": true,
