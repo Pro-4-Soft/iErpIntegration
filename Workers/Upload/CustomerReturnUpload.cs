@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Pro4Soft.iErpIntegration.Dto.P4W;
 using Pro4Soft.iErpIntegration.Infrastructure;
@@ -38,25 +37,25 @@ $select=Id,CustomerReturnNumber,ReferenceNumber
 &$filter=UploadDate eq null and CustomerReturnState eq 'Closed' and {(string.IsNullOrWhiteSpace(site.ClientName) ?
                         "ClientId eq null" :
                         $"Client/Name eq '{site.ClientName}'")}";
-                    var pos = await Singleton<Web>.Instance.GetInvokeAsync<List<CustomerReturn>>(url);
-                    if (!pos.Any())
+                    var rmas = await Singleton<Web>.Instance.GetInvokeAsync<List<CustomerReturn>>(url);
+                    if (!rmas.Any())
                         continue;
 
-                    foreach (var po in pos)
+                    foreach (var rma in rmas)
                     {
                         try
                         {
                             await site.WebInvokeAsync<dynamic>("IERPOperatSrv_EntradasComp/AddEntradaAsync", null, Method.POST, new
                             {
                                 EP_Id_Empresa = site.ErpClientId,
-                                ET_Referencia = po.CustomerReturnNumber,
+                                ET_Referencia = rma.CustomerReturnNumber,
                                 //EQ_ID_EntradasTipo = 4,//??
                                 //MO_Id_Moneda = 19,//??
                                 ET_Fecha_Emision = DateTime.UtcNow,
                                 ETS_Id_Estatus = 1,
                                 //ET_ControlInventario = true,//??
                                 //MF_Factor_Compra = 12,//??
-                                Detalles = po.Lines.Select(c=>new
+                                Detalles = rma.Lines.Select(c=>new
                                 {
                                     PR_Id_Producto = c.Product.ReferenceNumber?.ParseInt(),//??
                                     AL_Id_Almacen = site.WarehouseCode.ParseInt(),
@@ -69,20 +68,20 @@ $select=Id,CustomerReturnNumber,ReferenceNumber
                             //Confirm success
                             await Singleton<Web>.Instance.PostInvokeAsync("api/CustomerReturnApi/CreateOrUpdate", new
                             {
-                                po.Id,
+                                rma.Id,
                                 UploadDate = DateTime.UtcNow,
                                 UploadedSuceeded = true,
                                 UploadMessage = (string)null,
                             });
 
-                            await LogAsync($"RMA: [{po.CustomerReturnNumber}] for [{site.ClientName ?? site.Name}] uploaded");
+                            await LogAsync($"RMA: [{rma.CustomerReturnNumber}] for [{site.ClientName ?? site.Name}] uploaded");
                         }
                         catch (Exception e)
                         {
                             //Mark as failed
                             await Singleton<Web>.Instance.PostInvokeAsync("api/CustomerReturnApi/CreateOrUpdate", new
                             {
-                                po.Id,
+                                rma.Id,
                                 UploadDate = DateTime.UtcNow,
                                 UploadedSuceeded = false,
                                 UploadMessage = e.ToString()

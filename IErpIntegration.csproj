@@ -71,6 +71,7 @@
     <None Include="INSTALL.cmd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Compile Include="Dto\iERP\CustomerReturn.cs" />
     <Compile Include="Dto\P4W\CustomerReturn.cs" />
     <Compile Include="Dto\P4W\ProductAvailabilityRecord.cs" />
     <Compile Include="Dto\P4W\WorkOrder.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="Infrastructure\Cache.cs" />
     <Compile Include="Infrastructure\Extensions.cs" />
     <Compile Include="Infrastructure\ScheduleSetting.cs" />
+    <Compile Include="Workers\Download\CustomerReturnDownload.cs" />
     <Compile Include="Workers\Download\SalesOrderDownload.cs" />
     <Compile Include="Workers\Download\PurchaseOrderDownload.cs" />
     <Compile Include="Workers\Upload\AdjustmentUpload.cs" />

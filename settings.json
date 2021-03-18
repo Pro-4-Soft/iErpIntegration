@@ -3,19 +3,21 @@
     {
       "Name": "Test",
       "ClientName": null,
-      "ErpClientId": 18,
-      "WarehouseCode": "1",
+      "ErpClientId": 1,
+      "WarehouseCode": "001",
       "PurchaseOrderStatusForDownload": "2",
-      "SalesOrderStatusForDownload": "2",
+      "CustomerReturnStatusForDownload": "2",
+      "SalesOrderStatusForDownload": "3",
       "Url": "https://demoierpgateway.azurewebsites.net",
+      "email": "wcermeno@asptg.com",
       "BearerToken": "Q_l89f4Yhc5adt77G~~UVGFJ_s82If_oOo"
     }
   ],
   "Schedules": [
     {
       "Name": "ProductDownload",
-      "Active": true,
-      "RunOnStartup": false,
+      "Active": false,
+      "RunOnStartup": true,
       "Start": "2020-01-01T00:00:50-05:00",
       "Sleep": "00:00:30",
       "Class": "Pro4Soft.iErpIntegration.Workers.Download.ProductDownload",
@@ -24,8 +26,8 @@
     },
     {
       "Name": "PurchaseOrderDownload",
-      "Active": true,
-      "RunOnStartup": false,
+      "Active": false,
+      "RunOnStartup": true,
       "Start": "2020-01-01T00:00:50-05:00",
       "Sleep": "00:00:30",
       "Class": "Pro4Soft.iErpIntegration.Workers.Download.PurchaseOrderDownload",
@@ -33,9 +35,19 @@
       "AdditionalSettings": {}
     },
     {
+      "Name": "CustomerReturnDownload",
+      "Active": false,
+      "RunOnStartup": true,
+      "Start": "2020-01-01T00:00:50-05:00",
+      "Sleep": "00:00:30",
+      "Class": "Pro4Soft.iErpIntegration.Workers.Download.CustomerReturnDownload",
+      "ThreadName": "Download",
+      "AdditionalSettings": {}
+    },
+    {
       "Name": "SalesOrderDownload",
-      "Active": true,
-      "RunOnStartup": false,
+      "Active": false,
+      "RunOnStartup": true,
       "Start": "2020-01-01T00:00:50-05:00",
       "Sleep": "00:00:30",
       "Class": "Pro4Soft.iErpIntegration.Workers.Download.SalesOrderDownload",
@@ -44,7 +56,7 @@
     },
     {
       "Name": "SalesOrderUpload",
-      "Active": true,
+      "Active": false,
       "RunOnStartup": true,
       "Start": "2020-01-01T00:00:50-05:00",
       "Sleep": "00:05:00",
@@ -54,7 +66,7 @@
     },
     {
       "Name": "PurchaseOrderUpload",
-      "Active": true,
+      "Active": false,
       "RunOnStartup": true,
       "Start": "2020-01-01T00:00:50-05:00",
       "Sleep": "00:05:00",
@@ -74,7 +86,7 @@
     },
     {
       "Name": "WorkOrderUpload",
-      "Active": true,
+      "Active": false,
       "RunOnStartup": true,
       "Start": "2020-01-01T00:00:50-05:00",
       "Sleep": "00:05:00",
@@ -84,7 +96,7 @@
     },
     {
       "Name": "AdjustmentUpload",
-      "Active": true,
+      "Active": false,
       "RunOnStartup": true,
       "Start": "2020-01-01T00:00:50-05:00",
       "Sleep": "00:00:30",
@@ -94,7 +106,7 @@
     },
     {
       "Name": "InventorySyncUpload",
-      "Active": true,
+      "Active": false,
       "RunOnStartup": true,
       "Start": "2020-01-01T00:00:50-05:00",
       "Sleep": "00:00:30",

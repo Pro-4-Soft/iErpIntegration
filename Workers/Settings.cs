@@ -84,6 +84,7 @@ namespace Pro4Soft.iErpIntegration.Workers
         public string Name { get; set; }
         public DateTime? LastProductDownload { get; set; }
         public DateTime? LastPurchaseOrderDownload { get; set; }
+        public DateTime? LastCustomerReturnDownload { get; set; }
         public DateTime? LastSalesOrderDownload { get; set; }
     }
 }

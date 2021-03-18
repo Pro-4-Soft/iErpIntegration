@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -75,6 +76,11 @@ namespace Pro4Soft.iErpIntegration.Infrastructure
                     throw;
                 return defaultValue;
             }
+        }
+
+        public static DateTime Time(DateTime? time = null, string timeZone = "Eastern Standard Time")
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(time ?? DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById(timeZone));
         }
     }
 }

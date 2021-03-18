@@ -9,9 +9,9 @@ using RestSharp;
 
 namespace Pro4Soft.iErpIntegration.Workers.Download
 {
-    public class SalesOrderDownload : BaseWorker
+    public class CustomerReturnDownload : BaseWorker
     {
-        public SalesOrderDownload(ScheduleSetting settings) : base(settings)
+        public CustomerReturnDownload(ScheduleSetting settings) : base(settings)
         {
         }
 
@@ -27,42 +27,47 @@ namespace Pro4Soft.iErpIntegration.Workers.Download
                 try
                 {
                     var cache = App<Cache>.Instance[site.Name];
-                    var result = (await site.WebInvokeAsync<List<Dto.iERP.SalesOrder>>("IERPOperatSrv_CotizacionesComp/GetCotizacionesAsync", "List", Method.POST, new
+                    var timeUtc = cache.LastCustomerReturnDownload ?? DateTime.UtcNow.Subtract(TimeSpan.FromDays(100));
+
+                    var orders = await site.WebInvokeAsync<List<Dto.iERP.CustomerReturn>>("IERPOperatSrv_DevolucionesComp/GetDevolucionesAsync", "List", Method.POST, new
                     {
                         SearchEP_Id_Empresa = site.ErpClientId,
-                        SearchCZ_Fecha_Emision_Desde = cache.LastSalesOrderDownload ?? DateTime.UtcNow.Subtract(TimeSpan.FromDays(100)),
-                        SearchCZE_Id_Cotizacion_Estatus = site.SalesOrderStatusForDownload
-                    })).ToList();
-
-                    if (!result.Any())
+                        SearchOC_Fecha_Habilitacion = TimeZoneInfo.ConvertTimeFromUtc(timeUtc, TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time")),
+                        SearchOE_Id_OC_Estatus = site.PurchaseOrderStatusForDownload,
+                        UserName = "p4w@asptg.com",
+                        OriginRoute = "P4WGet",
+                        OriginMethod = "GetP4WAsync",
+                    });
+                    if (!orders.Any())
                         return;
 
                     var clientId = await GetClientIdAsync(site.ClientName);
-                    foreach (var order in result)
+                    foreach (var order in orders)
                     {
                         try
                         {
-                            var customerId = await IdLookupAsync("odata/Customer", $"CustomerCode eq '{HttpUtility.UrlEncode(order.CustomerName.Trim())}' and ClientId eq {(clientId == null ? "null" : $"{clientId}")}");
+                            var customerId = await IdLookupAsync("odata/Customer", $"CustomerCode eq '{HttpUtility.UrlEncode(order.CustomerCode.Trim())}' and ClientId eq {(clientId == null ? "null" : $"{clientId}")}");
                             if (customerId == null)
                             {
                                 var cust = await Singleton<Web>.Instance.PostInvokeAsync<dynamic>("api/CustomerApi/CreateOrUpdate", new
                                 {
                                     ClientId = clientId,
-                                    CustomerCode = order.CustomerName,
+                                    order.CustomerCode,
                                     CompanyName = order.CustomerName,
-                                    order.Email
+                                    //order.Email,
+                                    //order.Phone,
                                 });
                                 customerId = cust.Id;
                                 await LogAsync($"Customer [{cust.CustomerCode}] {(string.IsNullOrWhiteSpace(site.ClientName) ? "" : $"for [{site.ClientName}]")} created");
                             }
 
                             //Order already exists in WMS, skip it
-                            var sos = await Singleton<Web>.Instance.GetInvokeAsync<List<PickTicket>>($@"odata/PickTicket?
-$select=Id,PickTicketState,PickTicketNumber
-&$filter=PickTicketNumber eq '{order.SalesOrderNumber}' and CustomerId eq {customerId} and {(string.IsNullOrWhiteSpace(site.ClientName) ?
+                            var rmas = await Singleton<Web>.Instance.GetInvokeAsync<List<CustomerReturn>>($@"odata/CustomerReturn?
+$select=Id,CustomerReturnState,CustomerReturnNumber
+&$filter=CustomerReturnNumber eq '{order.CustomerReturnNumber}' and CustomerId eq {customerId} and {(string.IsNullOrWhiteSpace(site.ClientName) ?
                                 "ClientId eq null" :
                                 $"Client/Name eq '{site.ClientName}'")}");
-                            if (sos.Any())
+                            if (rmas.Any())
                                 continue;
 
                             var payload = new
@@ -70,32 +75,22 @@ $select=Id,PickTicketState,PickTicketNumber
                                 ClientId = clientId,
                                 CustomerId = customerId,
                                 site.WarehouseCode,
-                                PickTicketNumber = order.SalesOrderNumber,
+                                order.CustomerReturnNumber,
                                 order.ReferenceNumber,
-                                //ShipToName = order.ShippingAddress?.Name ?? order.BillingAddress?.Name,
-                                //ShipToAddress1 = order.ShippingAddress?.Address1 ?? order.BillingAddress?.Address1,
-                                //ShipToAddress2 = order.ShippingAddress?.Address2 ?? order.BillingAddress?.Address2,
-                                //ShipToCity = order.ShippingAddress?.City ?? order.BillingAddress?.City,
-                                //ShipToStateProvince = order.ShippingAddress?.ProvinceCode ?? order.BillingAddress?.ProvinceCode,
-                                //ShipToZipPostal = order.ShippingAddress?.Zip ?? order.BillingAddress?.Zip,
-                                //ShipToCountry = order.ShippingAddress?.CountryCode ?? order.BillingAddress?.CountryCode,
-                                ShipToPhone = order.Phone,
-                                ShipToAttnTo = order.ContactPerson,
                                 Lines = order.Lines
                                     .Select(c => new
                                     {
-                                        c.Sku, 
-                                        c.OrderedQuantity
+                                        c.Sku,
+                                        c.Quantity
                                     }).ToList()
                             };
-
                             if (payload.Lines.Count > 0)
                             {
-                                await Singleton<Web>.Instance.PostInvokeAsync("api/PickTicketApi/CreateOrUpdate", payload);
-                                await LogAsync($"SO: [{order.SalesOrderNumber}] downloaded!");
+                                await Singleton<Web>.Instance.PostInvokeAsync("api/CustomerReturnApi/CreateOrUpdate", payload);
+                                await LogAsync($"RMA: [{order.CustomerReturnNumber}] downloaded!");
                             }
                             else
-                                await LogAsync($"SO: [{order.SalesOrderNumber}] skipped, no valid lines on an order!");
+                                await LogAsync($"RMA: [{order.CustomerReturnNumber}] skipped, no valid lines on an order!");
                         }
                         catch (Exception e)
                         {
@@ -103,7 +98,7 @@ $select=Id,PickTicketState,PickTicketNumber
                         }
                     }
 
-                    cache.LastSalesOrderDownload = DateTime.UtcNow;
+                    cache.LastCustomerReturnDownload = DateTime.UtcNow;
                     App<Cache>.Instance.SaveToFile();
                 }
                 catch (Exception e)

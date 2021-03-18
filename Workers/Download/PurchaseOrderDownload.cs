@@ -54,6 +54,15 @@ namespace Pro4Soft.iErpIntegration.Workers.Download
                                 await LogAsync($"Vendor [{order.VendorName}] created");
                             }
 
+                            //Order already exists in WMS, skip it
+                            var pos = await Singleton<Web>.Instance.GetInvokeAsync<List<PurchaseOrder>>($@"odata/PurchaseOrder?
+$select=Id,PurchaseOrderState,PurchaseOrderNumber
+&$filter=PurchaseOrderNumber eq '{order.PurchaseOrderNumber}' and VendorId eq {vendorId} and {(string.IsNullOrWhiteSpace(site.ClientName) ?
+                                "ClientId eq null" :
+                                $"Client/Name eq '{site.ClientName}'")}");
+                            if (pos.Any())
+                                continue;
+
                             var payload = new
                             {
                                 ClientId = clientId,
